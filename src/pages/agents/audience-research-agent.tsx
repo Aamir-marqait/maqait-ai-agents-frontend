@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
   ArrowLeft,
-  Sparkles,
   Copy,
   Download,
   Loader2,
@@ -187,7 +186,7 @@ ${companyName} is a ${companyNiche.toLowerCase()} company that positions itself 
 **Brand Expectations:**  
 - Innovation, reliability, partnership, and "outside-the-box" thinking`;
 
-    const getPersonas = (niche: string, companyName: string) => {
+    const getPersonas = (niche: string) => {
       if (niche.toLowerCase().includes("digital marketing") || niche.toLowerCase().includes("marketing")) {
         return `**Persona A:**  
 - **Name:** Rina Shah  
@@ -264,7 +263,7 @@ ${companyName} is a ${companyNiche.toLowerCase()} company that positions itself 
 - **Message Preference:** Strategic, authoritative, long-term focused`;
     };
 
-    const buyerPersonas = getPersonas(companyNiche, companyName);
+    const buyerPersonas = getPersonas(companyNiche);
 
     const platformToneMapping = `| Segment | Best Platforms      | Messaging Tone            | Recommended Campaign Types         |
 |---------|--------------------|---------------------------|------------------------------------|

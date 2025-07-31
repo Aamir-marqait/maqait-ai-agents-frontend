@@ -6,7 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
   ArrowLeft,
-  Sparkles,
   Copy,
   Download,
   Loader2,
