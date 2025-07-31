@@ -14,7 +14,7 @@ const agents = [
     category: "Content Generation",
     description:
       "Your in-house columnist with a PhD in brand tone, creating human-like blogs.",
-    thumbnail: "/1.png",
+    thumbnail: "/card-1.jpg",
     tags: ["blogging", "content", "writing"],
     icon: (
       <img
@@ -31,7 +31,7 @@ const agents = [
     category: "Social Media",
     description:
       "Crafts intelligent, sharp, and platform-ready content for LinkedIn and Twitter.",
-    thumbnail: "/agent-logo/2.png",
+    thumbnail: "/card-2.png",
     tags: ["social media", "linkedin", "twitter"],
     icon: (
       <img
@@ -49,7 +49,7 @@ const agents = [
     category: "Marketing",
     description:
       "Builds data-driven marketing strategies for precise and effective campaigns.",
-    thumbnail: "/agent-logo/3.png",
+    thumbnail: "/card-3.jpg",
     tags: ["marketing", "strategy", "campaigns"],
     icon: (
       <img
@@ -67,7 +67,7 @@ const agents = [
     category: "Business Intelligence",
     description:
       "Tracks competitors to spot market gaps and keep you two steps ahead.",
-    thumbnail: "/agent-logo/4.png",
+    thumbnail: "/card-4.jpg",
     tags: ["business", "competitors", "analysis"],
     icon: (
       <img
@@ -85,7 +85,7 @@ const agents = [
     category: "Marketing",
     description:
       "Segments your audience and builds personas to help you speak their language.",
-    thumbnail: "/agent-logo/5.png",
+    thumbnail: "/card-5.jpg",
     tags: ["marketing", "audience", "research"],
     icon: (
       <img
@@ -103,7 +103,7 @@ const agents = [
     category: "Content Generation",
     description:
       "Sharpens your existing copy to be more persuasive and conversion-focused.",
-    thumbnail: "/agent-logo/6.png",
+    thumbnail: "/card-6.jpg",
     tags: ["copywriting", "optimization", "conversion"],
     icon: (
       <img
@@ -121,7 +121,7 @@ const agents = [
     category: "SEO",
     description:
       "Fixes technical SEO issues, optimizes content, and boosts your SERP rankings.",
-    thumbnail: "/agent-logo/7.png",
+    thumbnail: "/card-7.jpg",
     tags: ["seo", "technical", "ranking"],
     icon: (
       <img
