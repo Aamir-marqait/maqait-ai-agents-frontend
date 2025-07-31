@@ -11,7 +11,7 @@ import FAQPage from "./pages/FAQPage";
 import DashboardLayout from "./components/DashboardLayout";
 import DashboardPage from "./pages/DashboardPage";
 import AgentsPage from "./pages/AgentsPage";
-import AgentDetailPage from "./pages/AgentDetailPage";
+// import AgentDetailPage from "./pages/AgentDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import BillingPage from "./pages/BillingPage";
 import BuyCreditsPage from "./pages/BuyCreditsPage";
@@ -23,6 +23,7 @@ import SEOAnalysisAgentPage from "./pages/agents/seo-analysis-agent";
 import CampaignStrategyAgentPage from "./pages/agents/campaign-strategy-agent";
 import CompetitorAnalysisAgentPage from "./pages/agents/competitor-analysis-agent";
 import AudienceResearchAgentPage from "./pages/agents/audience-research-agent";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -70,7 +71,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-            <Route
+            {/* <Route
               path="/agents/:id"
               element={
                 <ProtectedRoute>
@@ -79,7 +80,7 @@ function App() {
                   </DashboardLayout>
                 </ProtectedRoute>
               }
-            />
+            /> */}
             <Route
               path="/profile"
               element={
@@ -180,6 +181,9 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            
+            {/* Catch-all route for 404 */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </div>
       </Router>

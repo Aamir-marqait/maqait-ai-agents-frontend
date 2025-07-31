@@ -119,7 +119,7 @@ const CampaignStrategyAgentPage = () => {
   };
 
   const generateCampaignStrategy = (inputs: CampaignInputs): CampaignStrategyOutput => {
-    const { companyName, companyUrl, platforms, startDate, endDate, campaignObjective } = inputs;
+    const { companyName, platforms, startDate, endDate, campaignObjective } = inputs;
     const platformLabels = platforms.map(p => 
       platformOptions.find(opt => opt.id === p)?.label || p
     ).join(", ");
@@ -175,16 +175,19 @@ ${platforms.includes('google') ? '- Google Ads: Essential for capturing high-int
     const phase1End = Math.ceil(campaignDuration * 0.25);
     const phase2End = Math.ceil(campaignDuration * 0.6);
 
-    const campaignTimeline = `${startDateFormatted.split(' ')[0]}–${startDateFormatted.split(' ')[0] + phase1End - 1} ${startDateFormatted.split(' ')[1]}: Awareness
+    const startDay = parseInt(startDateFormatted.split(' ')[0]);
+    const startMonth = startDateFormatted.split(' ')[1];
+    
+    const campaignTimeline = `${startDay}–${startDay + phase1End - 1} ${startMonth}: Awareness
 - Platform teasers, service highlights, "Did You Know?" brand facts, introductory videos
 - Broad audience targeting (business pages, professionals in marketing, founders)
 
-${startDateFormatted.split(' ')[0] + phase1End}–${startDateFormatted.split(' ')[0] + phase2End - 1} ${startDateFormatted.split(' ')[1]}: Consideration
+${startDay + phase1End}–${startDay + phase2End - 1} ${startMonth}: Consideration
 - Educational blog shares, client case study carousels, short explainer videos
 - Interactive content: polls, Q&A sessions on Meta and Twitter; expertise posts on LinkedIn
 - Retargeting users who engaged with awareness content
 
-${startDateFormatted.split(' ')[0] + phase2End}–${endDateFormatted.split(' ')[0]} ${endDateFormatted.split(' ')[1]}: Lead Generation & Conversion
+${startDay + phase2End}–${endDateFormatted.split(' ')[0]} ${endDateFormatted.split(' ')[1]}: Lead Generation & Conversion
 - Promotion of limited-time offers (e.g., free digital audits/consultations)
 - Gated content (e-books, checklists, marketing strategy guides)
 - Lead forms and conversion-optimized landing pages
