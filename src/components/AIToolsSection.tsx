@@ -6,45 +6,53 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+import agent1 from "@/assets/agent-logo/1.png";
+import agent2 from "@/assets/agent-logo/2.png";
+import agent3 from "@/assets/agent-logo/3.png";
+import agent4 from "@/assets/agent-logo/4.png";
+import agent5 from "@/assets/agent-logo/5.png";
+import agent6 from "@/assets/agent-logo/6.png";
+import agent7 from "@/assets/agent-logo/7.png";
+
 const aiTools = [
   {
-    icon: <img src="/src/assets/agent-logo/1.png" alt="Blog Agent" className="w-10 h-10" />,
+    icon: <img src={agent1} alt="Blog Agent" className="w-10 h-10" />,
     name: "Blog Agent",
     description:
       "Your in-house columnist with a PhD in brand tone, creating human-like blogs.",
   },
   {
-    icon: <img src="/src/assets/agent-logo/2.png" alt="Social Media Post Generator" className="w-10 h-10" />,
+    icon: <img src={agent2} alt="Social Media Post Generator" className="w-10 h-10" />,
     name: "Social Media Post Generator (LinkedIn & Twitter)",
     description:
       "Crafts intelligent, sharp, and platform-ready content for LinkedIn and Twitter.",
   },
   {
-    icon: <img src="/src/assets/agent-logo/3.png" alt="Campaign Strategy Agent" className="w-10 h-10" />,
+    icon: <img src={agent3} alt="Campaign Strategy Agent" className="w-10 h-10" />,
     name: "Campaign Strategy Agent",
     description:
       "Builds data-driven marketing strategies for precise and effective campaigns.",
   },
   {
-    icon: <img src="/src/assets/agent-logo/4.png" alt="Competitor Analysis Agent" className="w-10 h-10" />,
+    icon: <img src={agent4} alt="Competitor Analysis Agent" className="w-10 h-10" />,
     name: "Competitor Analysis Agent",
     description:
       "Tracks competitors to spot market gaps and keep you two steps ahead.",
   },
   {
-    icon: <img src="/src/assets/agent-logo/5.png" alt="Audience Research Agent" className="w-10 h-10" />,
+    icon: <img src={agent5} alt="Audience Research Agent" className="w-10 h-10" />,
     name: "Audience Research Agent",
     description:
       "Segments your audience and builds personas to help you speak their language.",
   },
   {
-    icon: <img src="/src/assets/agent-logo/6.png" alt="Copy Optimization Agent" className="w-10 h-10" />,
+    icon: <img src={agent6} alt="Copy Optimization Agent" className="w-10 h-10" />,
     name: "Copy Optimization Agent",
     description:
       "Sharpens your existing copy to be more persuasive and conversion-focused.",
   },
   {
-    icon: <img src="/src/assets/agent-logo/7.png" alt="SEO Analysis Agent" className="w-10 h-10" />,
+    icon: <img src={agent7} alt="SEO Analysis Agent" className="w-10 h-10" />,
     name: "SEO Analysis Agent",
     description:
       "Fixes technical SEO issues, optimizes content, and boosts your SERP rankings.",
