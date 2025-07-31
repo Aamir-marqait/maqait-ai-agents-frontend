@@ -14,6 +14,8 @@ import {
   Linkedin,
   Hash,
   ImageIcon,
+  FileText,
+  Edit3,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -25,11 +27,14 @@ interface SocialMediaOutput {
   imagePrompt: string;
 }
 
+type Tab = "input" | "output";
+
 const SocialMediaAgentPage = () => {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [output, setOutput] = useState<SocialMediaOutput | null>(null);
+  const [mainTab, setMainTab] = useState<Tab>("input");
   const [activeTab, setActiveTab] = useState("linkedin");
 
   const handleGenerate = async () => {
@@ -54,6 +59,8 @@ const SocialMediaAgentPage = () => {
       };
 
       setOutput(mockOutput);
+      // Auto-switch to output tab after generation
+      setMainTab("output");
     } catch (error) {
       console.error("Generation failed:", error);
     } finally {
@@ -224,78 +231,118 @@ Image Prompt: ${output.imagePrompt}`;
           Back
         </Button>
 
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Input Section */}
-          <Card className="bg-gray-900/50 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Sparkles className="w-5 h-5 text-blue-400" />
-                Social Media Post Topic & Requirements
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Textarea
-                placeholder='Enter your social media post topic here...
-Example: "AI tools that are revolutionizing productivity in 2024"'
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="min-h-[150px] bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 resize-none"
-              />
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-400">
-                  {input.length}/500 characters
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <span>Credits required:</span>
-                  <Badge
-                    variant="outline"
-                    className="border-blue-500/30 text-blue-300"
-                  >
-                    15 credits
-                  </Badge>
-                </div>
-              </div>
-              <Button
-                onClick={handleGenerate}
-                disabled={!input.trim() || isGenerating}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Generating Social Media Posts...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Generate Social Media Posts
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="max-w-4xl mx-auto">
+          {/* Tab Navigation */}
+          <div className="flex border-b border-gray-700 mb-8">
+            <button
+              onClick={() => setMainTab("input")}
+              className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors border-b-2 ${
+                mainTab === "input"
+                  ? "text-blue-400 border-blue-400"
+                  : "text-gray-400 border-gray-700 hover:text-gray-300"
+              }`}
+            >
+              <Edit3 className="w-4 h-4" />
+              Input
+            </button>
+            <button
+              onClick={() => output && setMainTab("output")}
+              disabled={!output}
+              className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors border-b-2 ${
+                mainTab === "output" && output
+                  ? "text-blue-400 border-blue-400"
+                  : output
+                  ? "text-gray-400 border-gray-700 hover:text-gray-300 cursor-pointer"
+                  : "text-gray-600 border-gray-700 cursor-not-allowed"
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              Output
+              {!output && (
+                <Badge variant="outline" className="text-xs border-gray-600 text-gray-500">
+                  Generate first
+                </Badge>
+              )}
+            </button>
+          </div>
 
-          {/* Output Section */}
-          {isGenerating ? (
-            <Card className="bg-gray-900/50 border-gray-700">
-              <CardContent className="py-16">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse"></div>
-                    <Loader2 className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin" />
+          {/* Tab Content */}
+          <div className="min-h-[600px]">
+            {/* Input Tab */}
+            {mainTab === "input" && (
+              <Card className="bg-gray-900/50 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Sparkles className="w-5 h-5 text-blue-400" />
+                    Social Media Post Topic & Requirements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Textarea
+                    placeholder='Enter your social media post topic here...
+Example: "AI tools that are revolutionizing productivity in 2024"'
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    className="min-h-[300px] bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 resize-none"
+                  />
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-400">
+                      {input.length}/500 characters
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <span>Credits required:</span>
+                      <Badge
+                        variant="outline"
+                        className="border-blue-500/30 text-blue-300"
+                      >
+                        15 credits
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">
-                      Creating your social media posts...
-                    </p>
-                    <p className="text-gray-400 text-sm">
-                      Generating content for LinkedIn and Twitter
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : output ? (
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={!input.trim() || isGenerating}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3"
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Generating Social Media Posts...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Generate Social Media Posts
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Output Tab */}
+            {mainTab === "output" && (
+              <>
+                {isGenerating ? (
+                  <Card className="bg-gray-900/50 border-gray-700">
+                    <CardContent className="py-16">
+                      <div className="flex flex-col items-center justify-center space-y-4">
+                        <div className="relative">
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse"></div>
+                          <Loader2 className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-white font-medium">
+                            Creating your social media posts...
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            Generating content for LinkedIn and Twitter
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : output ? (
             <div className="space-y-6">
               {/* Generated Image */}
               <Card className="bg-gray-900/50 border-gray-700">
@@ -330,14 +377,14 @@ Example: "AI tools that are revolutionizing productivity in 2024"'
                 <TabsList className="grid w-full grid-cols-2 bg-gray-800">
                   <TabsTrigger
                     value="linkedin"
-                    className="flex items-center gap-2 text-white focus:text-black"
+                    className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-gray-300"
                   >
                     <Linkedin className="w-4 h-4" />
                     LinkedIn
                   </TabsTrigger>
                   <TabsTrigger
                     value="twitter"
-                    className="flex items-center gap-2 text-white focus:text-black"
+                    className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white data-[state=inactive]:text-gray-400 data-[state=inactive]:hover:text-gray-300"
                   >
                     <Twitter className="w-4 h-4" />
                     Twitter
@@ -499,25 +546,28 @@ Example: "AI tools that are revolutionizing productivity in 2024"'
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          ) : (
-            <Card className="bg-gray-900/50 border-gray-700">
-              <CardContent className="py-16">
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
-                    <Sparkles className="w-8 h-8 text-gray-600" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-400 mb-2">
-                    Ready to create engaging social media content
-                  </h3>
-                  <p className="text-gray-500 text-sm max-w-sm">
-                    Enter your post topic and we'll generate optimized content
-                    for LinkedIn and Twitter with relevant hashtags.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                ) : (
+                  <Card className="bg-gray-900/50 border-gray-700">
+                    <CardContent className="py-16">
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                          <Sparkles className="w-8 h-8 text-gray-600" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-400 mb-2">
+                          Ready to create engaging social media content
+                        </h3>
+                        <p className="text-gray-500 text-sm max-w-sm">
+                          Enter your post topic and we'll generate optimized content
+                          for LinkedIn and Twitter with relevant hashtags.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

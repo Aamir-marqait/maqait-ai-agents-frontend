@@ -3,13 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Sparkles, Copy, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Copy, Download, Loader2, FileText, Edit3 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+type Tab = "input" | "output";
 
 const BlogAgentPage = () => {
   const navigate = useNavigate();
   const [input, setInput] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("input");
   const [output, setOutput] = useState<{
     title: string;
     content: string;
@@ -32,12 +35,14 @@ const BlogAgentPage = () => {
       // Mock response with both generated text and image
       const mockOutput = {
         title: generateTitle(input),
-        content: generateBlogContent(input),
+        content: generateBlogContent(),
         image: `/1.png`, // Using available asset
         imagePrompt: imagePrompt,
       };
 
       setOutput(mockOutput);
+      // Auto-switch to output tab after generation
+      setActiveTab("output");
     } catch (error) {
       console.error("Generation failed:", error);
     } finally {
@@ -73,7 +78,7 @@ const BlogAgentPage = () => {
   };
 
   // Helper function to generate blog content from input
-  const generateBlogContent = (_input: string): string => {
+  const generateBlogContent = (): string => {
     // This would call your AI text generation service
     // For now, returning the example content
     return `If you're working in marketing, you've probably heard a lot about AI lately – not just as a buzzword but as a real game-changer. The question is, how can marketing agencies actually use AI to boost their ROI and get sharper customer insights? There's some solid data on this, and a few practical ways to make AI work for you.
@@ -126,6 +131,8 @@ ${blogData.imagePrompt ? `Image Prompt: ${blogData.imagePrompt}` : ""}
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
+
+      
       // Download the image separately
       if (blogData.image && !blogData.image.includes("1.png")) {
         const imageLink = document.createElement("a");
@@ -154,81 +161,122 @@ ${blogData.imagePrompt ? `Image Prompt: ${blogData.imagePrompt}` : ""}
           <ArrowLeft className="w-4 h-4 " />
           Back
         </Button>
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Input Section */}
-          <Card className="bg-gray-900/50 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Sparkles className="w-5 h-5 text-violet-400" />
-                Blog Topic & Requirements
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Textarea
-                placeholder='Enter your blog topic and requirements here...
+        
+        <div className="max-w-4xl mx-auto">
+          {/* Tab Navigation */}
+          <div className="flex border-b border-gray-700 mb-8">
+            <button
+              onClick={() => setActiveTab("input")}
+              className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors border-b-2 ${
+                activeTab === "input"
+                  ? "text-violet-400 border-violet-400"
+                  : "text-gray-400 border-gray-700 hover:text-gray-300"
+              }`}
+            >
+              <Edit3 className="w-4 h-4" />
+              Input
+            </button>
+            <button
+              onClick={() => output && setActiveTab("output")}
+              disabled={!output}
+              className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors border-b-2 ${
+                activeTab === "output" && output
+                  ? "text-violet-400 border-violet-400"
+                  : output
+                  ? "text-gray-400 border-gray-700 hover:text-gray-300 cursor-pointer"
+                  : "text-gray-600 border-gray-700 cursor-not-allowed"
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              Output
+              {!output && (
+                <Badge variant="outline" className="text-xs border-gray-600 text-gray-500">
+                  Generate first
+                </Badge>
+              )}
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="min-h-[600px]">
+            {/* Input Tab */}
+            {activeTab === "input" && (
+              <Card className="bg-gray-900/50 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Sparkles className="w-5 h-5 text-violet-400" />
+                    Blog Topic & Requirements
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Textarea
+                    placeholder='Enter your blog topic and requirements here...
 
 Example: "Blog post about AI and how we can use them for our benefits from marketing agency perspective"'
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="min-h-[200px] bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-violet-500 resize-none"
-              />
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    className="min-h-[300px] bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-violet-500 resize-none"
+                  />
 
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-400">
-                  {input.length}/1000 characters
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <span>Credits required:</span>
-                  <Badge
-                    variant="outline"
-                    className="border-violet-500/30 text-violet-300"
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-400">
+                      {input.length}/1000 characters
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <span>Credits required:</span>
+                      <Badge
+                        variant="outline"
+                        className="border-violet-500/30 text-violet-300"
+                      >
+                        20 credits
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={!input.trim() || isGenerating}
+                    className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold py-3"
                   >
-                    20 credits
-                  </Badge>
-                </div>
-              </div>
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Generating Blog Post...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Generate Blog Post
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
-              <Button
-                onClick={handleGenerate}
-                disabled={!input.trim() || isGenerating}
-                className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-semibold py-3"
-              >
+            {/* Output Tab */}
+            {activeTab === "output" && (
+              <>
                 {isGenerating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Generating Blog Post...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Generate Blog Post
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Output Section - Blog Style */}
-          {isGenerating ? (
-            <Card className="bg-gray-900/50 border-gray-700">
-              <CardContent className="py-16">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 animate-pulse"></div>
-                    <Loader2 className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">
-                      Creating your blog post...
-                    </p>
-                    <p className="text-gray-400 text-sm">
-                      This may take a few moments
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : output ? (
+                  <Card className="bg-gray-900/50 border-gray-700">
+                    <CardContent className="py-16">
+                      <div className="flex flex-col items-center justify-center space-y-4">
+                        <div className="relative">
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 animate-pulse"></div>
+                          <Loader2 className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-white font-medium">
+                            Creating your blog post...
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            This may take a few moments
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : output ? (
             <article className="bg-gray-950 text-white rounded-lg overflow-hidden shadow-2xl border border-violet-500/30">
               {/* Cover Image */}
               <div className="relative h-80 overflow-hidden">
@@ -338,25 +386,28 @@ Example: "Blog post about AI and how we can use them for our benefits from marke
                   </div>
                 </div>
               </div>
-            </article>
-          ) : (
-            <Card className="bg-gray-900/50 border-gray-700">
-              <CardContent className="py-16">
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
-                    <Sparkles className="w-8 h-8 text-gray-600" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-400 mb-2">
-                    Ready to create amazing content
-                  </h3>
-                  <p className="text-gray-500 text-sm max-w-sm">
-                    Enter your blog topic and requirements in the input field,
-                    then click generate to create your blog post.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                  </article>
+                ) : (
+                  <Card className="bg-gray-900/50 border-gray-700">
+                    <CardContent className="py-16">
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                          <Sparkles className="w-8 h-8 text-gray-600" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-400 mb-2">
+                          Ready to create amazing content
+                        </h3>
+                        <p className="text-gray-500 text-sm max-w-sm">
+                          Enter your blog topic and requirements in the input field,
+                          then click generate to create your blog post.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

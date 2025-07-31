@@ -231,11 +231,27 @@ const AgentsPage = () => {
                 <div className="absolute inset-0 bg-black/20"></div>
                 <div className="absolute bottom-0 left-0 p-4">
                   <CardTitle className="text-white text-4xl font-bold">
-                    {agent.name.split(" ").map((word, index) => (
-                      <span key={index} className="block">
-                        {word}
-                      </span>
-                    ))}
+                    {(() => {
+                      const words = agent.name.split(" ");
+                      if (words.length <= 2) {
+                        return (
+                          <>
+                            <span className="block">{words[0] || ""}</span>
+                            <span className="block">{words[1] || ""}</span>
+                          </>
+                        );
+                      } else {
+                        const midPoint = Math.floor(words.length / 2);
+                        const firstLine = words.slice(0, midPoint).join(" ");
+                        const secondLine = words.slice(midPoint).join(" ");
+                        return (
+                          <>
+                            <span className="block">{firstLine}</span>
+                            <span className="block">{secondLine}</span>
+                          </>
+                        );
+                      }
+                    })()}
                   </CardTitle>
                   <div className="flex flex-wrap gap-1 mt-2">
                     {agent.tags.map((tag, index) => (
