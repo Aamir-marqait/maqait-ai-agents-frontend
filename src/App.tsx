@@ -18,6 +18,8 @@ import BlogAgentPage from "./pages/agents/blog-agent";
 import "./App.css";
 import SocialMediaAgentPage from "./pages/agents/social-media-post-generator";
 import CopyOptimizationAgentPage from "./pages/agents/copy-optimization-agent-page";
+import SEOAnalysisAgentPage from "./pages/agents/seo-analysis-agent";
+import CampaignStrategyAgentPage from "./pages/agents/campaign-strategy-agent";
 
 function App() {
   return (
@@ -120,6 +122,26 @@ function App() {
                 <ProtectedRoute>
                   <DashboardLayout>
                     <CopyOptimizationAgentPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/agents/seo-analysis-agent"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <SEOAnalysisAgentPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/agents/campaign-strategy-agent"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <CampaignStrategyAgentPage />
                   </DashboardLayout>
                 </ProtectedRoute>
               }

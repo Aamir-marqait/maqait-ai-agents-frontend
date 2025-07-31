@@ -16,6 +16,8 @@ import {
   Target,
   TrendingUp,
   Lightbulb,
+  FileText,
+  Edit3,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -25,6 +27,8 @@ interface CopyOptimizationOutput {
   recommendations: string[];
   suggestedTaglines: string[];
 }
+
+type Tab = "input" | "output";
 
 const CopyOptimizationAgentPage = () => {
   const navigate = useNavigate();
@@ -36,6 +40,7 @@ const CopyOptimizationAgentPage = () => {
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [output, setOutput] = useState<CopyOptimizationOutput | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>("input");
 
   const handleInputChange = (field: string, value: string) => {
     setInputs((prev) => ({ ...prev, [field]: value }));
@@ -57,6 +62,8 @@ const CopyOptimizationAgentPage = () => {
       };
 
       setOutput(mockOutput);
+      // Auto-switch to output tab after generation
+      setActiveTab("output");
     } catch (error) {
       console.error("Generation failed:", error);
     } finally {
@@ -261,129 +268,169 @@ Date: ${new Date().toLocaleDateString()}`;
           Back
         </Button>
 
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Input Section */}
-          <Card className="bg-gray-900/50 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Target className="w-5 h-5 text-orange-400" />
-                Copy Optimization Analysis
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="companyName" className="text-gray-300">
-                    Company Name *
-                  </Label>
-                  <Input
-                    id="companyName"
-                    placeholder="e.g., Bombay Toy Company"
-                    value={inputs.companyName}
-                    onChange={(e) =>
-                      handleInputChange("companyName", e.target.value)
-                    }
-                    className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="website" className="text-gray-300">
-                    Website URL
-                  </Label>
-                  <Input
-                    id="website"
-                    placeholder="e.g., www.bombaytoys.com"
-                    value={inputs.website}
-                    onChange={(e) =>
-                      handleInputChange("website", e.target.value)
-                    }
-                    className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
-                  />
-                </div>
-              </div>
+        <div className="max-w-4xl mx-auto">
+          {/* Tab Navigation */}
+          <div className="flex border-b border-gray-700 mb-8">
+            <button
+              onClick={() => setActiveTab("input")}
+              className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors border-b-2 ${
+                activeTab === "input"
+                  ? "text-orange-400 border-orange-400"
+                  : "text-gray-400 border-gray-700 hover:text-gray-300"
+              }`}
+            >
+              <Edit3 className="w-4 h-4" />
+              Input
+            </button>
+            <button
+              onClick={() => output && setActiveTab("output")}
+              disabled={!output}
+              className={`flex items-center gap-2 px-6 py-3 font-medium transition-colors border-b-2 ${
+                activeTab === "output" && output
+                  ? "text-orange-400 border-orange-400"
+                  : output
+                  ? "text-gray-400 border-gray-700 hover:text-gray-300 cursor-pointer"
+                  : "text-gray-600 border-gray-700 cursor-not-allowed"
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              Output
+              {!output && (
+                <Badge variant="outline" className="text-xs border-gray-600 text-gray-500">
+                  Generate first
+                </Badge>
+              )}
+            </button>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="fields" className="text-gray-300">
-                  Industry/Fields
-                </Label>
-                <Input
-                  id="fields"
-                  placeholder="e.g., Toys, Education, Handmade products"
-                  value={inputs.fields}
-                  onChange={(e) => handleInputChange("fields", e.target.value)}
-                  className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
-                />
-              </div>
+          {/* Tab Content */}
+          <div className="min-h-[600px]">
+            {/* Input Tab */}
+            {activeTab === "input" && (
+              <Card className="bg-gray-900/50 border-gray-700">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Target className="w-5 h-5 text-orange-400" />
+                    Copy Optimization Analysis
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="companyName" className="text-gray-300">
+                        Company Name *
+                      </Label>
+                      <Input
+                        id="companyName"
+                        placeholder="e.g., Bombay Toy Company"
+                        value={inputs.companyName}
+                        onChange={(e) =>
+                          handleInputChange("companyName", e.target.value)
+                        }
+                        className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="website" className="text-gray-300">
+                        Website URL
+                      </Label>
+                      <Input
+                        id="website"
+                        placeholder="e.g., www.bombaytoys.com"
+                        value={inputs.website}
+                        onChange={(e) =>
+                          handleInputChange("website", e.target.value)
+                        }
+                        className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                      />
+                    </div>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="context" className="text-gray-300">
-                  Context & Background *
-                </Label>
-                <Textarea
-                  id="context"
-                  placeholder="Provide context about your company, current messaging, target audience, challenges, and goals. Include any existing taglines or brand positioning you'd like analyzed."
-                  value={inputs.context}
-                  onChange={(e) => handleInputChange("context", e.target.value)}
-                  className="min-h-[120px] bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500 resize-none"
-                />
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="fields" className="text-gray-300">
+                      Industry/Fields
+                    </Label>
+                    <Input
+                      id="fields"
+                      placeholder="e.g., Toys, Education, Handmade products"
+                      value={inputs.fields}
+                      onChange={(e) => handleInputChange("fields", e.target.value)}
+                      className="bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                    />
+                  </div>
 
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-400">
-                  {inputs.context.length}/2000 characters
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <span>Credits required:</span>
-                  <Badge
-                    variant="outline"
-                    className="border-orange-500/30 text-orange-300"
+                  <div className="space-y-2">
+                    <Label htmlFor="context" className="text-gray-300">
+                      Context & Background *
+                    </Label>
+                    <Textarea
+                      id="context"
+                      placeholder="Provide context about your company, current messaging, target audience, challenges, and goals. Include any existing taglines or brand positioning you'd like analyzed."
+                      value={inputs.context}
+                      onChange={(e) => handleInputChange("context", e.target.value)}
+                      className="min-h-[200px] bg-gray-800/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500 resize-none"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-400">
+                      {inputs.context.length}/2000 characters
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <span>Credits required:</span>
+                      <Badge
+                        variant="outline"
+                        className="border-orange-500/30 text-orange-300"
+                      >
+                        25 credits
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleGenerate}
+                    disabled={!isFormValid || isGenerating}
+                    className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-3"
                   >
-                    25 credits
-                  </Badge>
-                </div>
-              </div>
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Analyzing Copy & Brand Positioning...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Generate Copy Analysis
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
 
-              <Button
-                onClick={handleGenerate}
-                disabled={!isFormValid || isGenerating}
-                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-3"
-              >
+            {/* Output Tab */}
+            {activeTab === "output" && (
+              <>
                 {isGenerating ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Analyzing Copy & Brand Positioning...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Generate Copy Analysis
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Output Section */}
-          {isGenerating ? (
-            <Card className="bg-gray-900/50 border-gray-700">
-              <CardContent className="py-16">
-                <div className="flex flex-col items-center justify-center space-y-4">
-                  <div className="relative">
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-r from-orange-600 to-red-600 animate-pulse"></div>
-                    <Loader2 className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">
-                      Analyzing your brand and copy...
-                    </p>
-                    <p className="text-gray-400 text-sm">
-                      Generating insights and recommendations
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : output ? (
+                  <Card className="bg-gray-900/50 border-gray-700">
+                    <CardContent className="py-16">
+                      <div className="flex flex-col items-center justify-center space-y-4">
+                        <div className="relative">
+                          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-orange-600 to-red-600 animate-pulse"></div>
+                          <Loader2 className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-spin" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-white font-medium">
+                            Analyzing your brand and copy...
+                          </p>
+                          <p className="text-gray-400 text-sm">
+                            Generating insights and recommendations
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : output ? (
             <div className="space-y-6">
               {/* Main Analysis */}
               <Card className="bg-gray-900/50 border-gray-700">
@@ -529,26 +576,29 @@ Date: ${new Date().toLocaleDateString()}`;
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          ) : (
-            <Card className="bg-gray-900/50 border-gray-700">
-              <CardContent className="py-16">
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
-                    <Target className="w-8 h-8 text-gray-600" />
                   </div>
-                  <h3 className="text-lg font-medium text-gray-400 mb-2">
-                    Ready to optimize your brand copy
-                  </h3>
-                  <p className="text-gray-500 text-sm max-w-sm">
-                    Provide your company details and context to receive
-                    comprehensive brand analysis and copy optimization
-                    recommendations.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                ) : (
+                  <Card className="bg-gray-900/50 border-gray-700">
+                    <CardContent className="py-16">
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
+                          <Target className="w-8 h-8 text-gray-600" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-400 mb-2">
+                          Ready to optimize your brand copy
+                        </h3>
+                        <p className="text-gray-500 text-sm max-w-sm">
+                          Provide your company details and context to receive
+                          comprehensive brand analysis and copy optimization
+                          recommendations.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
