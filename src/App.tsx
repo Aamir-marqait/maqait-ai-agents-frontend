@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { AuthProvider } from "./contexts/AuthContext";
 import Header from "./components/Header";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -20,11 +21,24 @@ import SocialMediaAgentPage from "./pages/agents/social-media-post-generator";
 import CopyOptimizationAgentPage from "./pages/agents/copy-optimization-agent-page";
 import SEOAnalysisAgentPage from "./pages/agents/seo-analysis-agent";
 import CampaignStrategyAgentPage from "./pages/agents/campaign-strategy-agent";
+import CompetitorAnalysisAgentPage from "./pages/agents/competitor-analysis-agent";
+import AudienceResearchAgentPage from "./pages/agents/audience-research-agent";
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <div className="min-h-screen bg-black text-white">
           <Header />
           <Routes>
@@ -142,6 +156,26 @@ function App() {
                 <ProtectedRoute>
                   <DashboardLayout>
                     <CampaignStrategyAgentPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/agents/competitor-analysis-agent"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <CompetitorAnalysisAgentPage />
+                  </DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/agents/audience-research-agent"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout>
+                    <AudienceResearchAgentPage />
                   </DashboardLayout>
                 </ProtectedRoute>
               }
