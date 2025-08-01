@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import type React from "react";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,8 +22,36 @@ import "../loader.css";
 const OTPPage = () => {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const navigate = useNavigate();
-  const { verifyOtp, isLoading } = useAuth();
+  const { verifyOtp, resendOtp, isLoading } = useAuth();
   const inputRefs = useRef<HTMLInputElement[]>([]);
+  const [resendTimer, setResendTimer] = useState(60);
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setResendTimer((prevTimer) => {
+        if (prevTimer === 1) {
+          clearInterval(timer);
+          setIsResendDisabled(false);
+          return 0;
+        }
+        return prevTimer - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isResendDisabled]);
+
+  const handleResendOtp = async () => {
+    try {
+      await resendOtp();
+      toast.success("A new OTP has been sent to your email.");
+      setIsResendDisabled(true);
+      setResendTimer(60);
+    } catch (error) {
+      toast.error("Failed to resend OTP. Please try again later.");
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,6 +149,21 @@ const OTPPage = () => {
                 )}
               </Button>
             </form>
+            <div className="text-center mt-4">
+              {isResendDisabled ? (
+                <p className="text-gray-400">
+                  Resend OTP in {resendTimer}s
+                </p>
+              ) : (
+                <Button
+                  onClick={handleResendOtp}
+                  disabled={isResendDisabled || isLoading}
+                  className="text-violet-400 hover:text-violet-300"
+                >
+                  Resend OTP
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
