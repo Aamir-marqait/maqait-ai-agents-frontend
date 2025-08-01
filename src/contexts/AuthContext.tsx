@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
@@ -46,8 +47,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    if (savedUser && savedUser !== "undefined") {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        localStorage.removeItem("user");
+      }
     }
     setIsLoading(false);
   }, []);
@@ -61,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
       const { access_token } = response.data;
       localStorage.setItem("authToken", access_token);
-      await getProfile();
+      await getCurrentUser();
     } catch (error) {
       throw new Error("Invalid email or password");
     } finally {
@@ -101,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       const { access_token } = response.data;
       localStorage.setItem("authToken", access_token);
-      await getProfile();
+      await getCurrentUser();
     } catch (error) {
       throw new Error("Invalid OTP");
     } finally {
@@ -109,14 +114,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const getProfile = async () => {
+  const getCurrentUser = async () => {
     try {
-      const response = await apiClient.get("/api/v0/users/profile");
+      console.log("Fetching current user...");
+      const response = await apiClient.get("/api/v0/me");
+      console.log("User response:", response.data);
       const user = response.data;
-      setUser(user);
-      localStorage.setItem("user", JSON.stringify(user));
+      if (user) {
+        setUser(user);
+        localStorage.setItem("user", JSON.stringify(user));
+        console.log("User data saved:", user);
+      } else {
+        console.error("No user data received from API");
+      }
     } catch (error) {
-      // Handle error
+      console.error("Error fetching current user:", error);
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
     }
   };
 
@@ -136,6 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
+    localStorage.removeItem("authToken");
   };
 
   const value = {
