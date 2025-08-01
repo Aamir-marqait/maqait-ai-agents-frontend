@@ -19,6 +19,7 @@ interface AuthContextType {
   signup: (name: string, email: string, password: string) => Promise<void>;
   verifyOtp: (otp: string) => Promise<void>;
   resendOtp: () => Promise<void>;
+  getOtpStatus: () => Promise<any>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -55,21 +56,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      if (email === "anas@marqait.com" && password === "anas") {
-        const mockUser: User = {
-          id: "1",
-          email,
-          name: "Anas",
-          username: "anas",
-          credits: 300,
-        };
-        setUser(mockUser);
-        localStorage.setItem("user", JSON.stringify(mockUser));
-      } else {
-        throw new Error("Invalid email or password");
-      }
+      const response = await apiClient.post("/api/v0/login", {
+        email,
+        password,
+      });
+      const { access_token } = response.data;
+      localStorage.setItem("authToken", access_token);
+      await getProfile();
+    } catch (error) {
+      throw new Error("Invalid email or password");
     } finally {
       setIsLoading(false);
     }
@@ -93,25 +88,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const verifyOtp = async (otp: string) => {
     setIsLoading(true);
+    if (!signupData.email || !signupData.password) {
+      throw new Error("Email or password not found");
+    }
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await apiClient.post(
+        `/api/v0/register/verify?password=${signupData.password}`,
+        {
+          email: signupData.email,
+          otp_code: otp,
+        }
+      );
 
-      if (otp === "123456") {
-        const mockUser: User = {
-          id: "1",
-          email: "user@example.com", // You might want to get this from signup state
-          name: "New User", // You might want to get this from signup state
-          username: "newuser",
-          credits: 100,
-        };
-        setUser(mockUser);
-        localStorage.setItem("user", JSON.stringify(mockUser));
-      } else {
-        throw new Error("Invalid OTP");
-      }
+      const { access_token } = response.data;
+      localStorage.setItem("authToken", access_token);
+      await getProfile();
+    } catch (error) {
+      throw new Error("Invalid OTP");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const getProfile = async () => {
+    try {
+      const response = await apiClient.get("/api/v0/users/profile");
+      const user = response.data;
+      setUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
+    } catch (error) {
+      // Handle error
     }
   };
 
@@ -120,13 +126,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       throw new Error("No email found for resending OTP.");
     }
     try {
-      await apiClient.post("/api/v0/register/initiate", {
+      await apiClient.post("/api/v0/register/resend-otp", {
         email: signupData.email,
-        password: signupData.password,
-        full_name: signupData.full_name,
       });
     } catch (error) {
       throw new Error("Failed to resend OTP.");
+    }
+  };
+
+  const getOtpStatus = async () => {
+    if (!signupData.email) {
+      throw new Error("No email found to get OTP status.");
+    }
+    try {
+      const response = await apiClient.get(
+        `/api/v0/register/otp-status/${signupData.email}`
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error("Failed to get OTP status.");
     }
   };
 

@@ -85,6 +85,10 @@ class ApiClient {
   getAxiosInstance(): AxiosInstance {
     return this.instance;
   }
+
+  setToken(token: string) {
+    this.instance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  }
 }
 
 export const apiClient = new ApiClient();
