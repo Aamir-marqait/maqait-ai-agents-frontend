@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { Camera, KeyRound, AlertTriangle, User, Save, Trash2 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,13 +23,8 @@ const TabButton = ({ active, onClick, children }: { active: boolean, onClick: ()
 );
 
 const ProfilePage = () => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
-  const [profileData, _setProfileData] = useState({
-    displayName: "Anas",
-    username: "anas",
-    email: "anas@marqait.com",
-    organization: "MarqAI",
-  });
 
   return (
     <div className="p-4 sm:p-6 md:p-8 max-w-6xl mx-auto text-gray-100">
@@ -68,9 +64,9 @@ const ProfilePage = () => {
                 <div className="flex items-center space-x-6">
                   <div className="relative group cursor-pointer">
                     <Avatar className="w-24 h-24 border-2 border-gray-700 group-hover:border-violet-500 transition-colors">
-                      <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${profileData.username}`} />
+                      <AvatarImage src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user?.username}`} />
                       <AvatarFallback className="bg-violet-600 text-white text-2xl">
-                        {profileData.displayName.split(" ").map((n) => n[0]).join("")}
+                        {user?.name.split(" ").map((n) => n[0]).join("")}
                       </AvatarFallback>
                     </Avatar>
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
@@ -84,21 +80,17 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="displayName" className="text-gray-300">Display Name</Label>
-                    <Input id="displayName" value={profileData.displayName} className="bg-gray-800 border-gray-700 text-white focus:bg-gray-700 focus:border-violet-500" />
+                    <Input id="displayName" value={user?.name || ""} className="bg-gray-800 border-gray-700 text-white focus:bg-gray-700 focus:border-violet-500" />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="username" className="text-gray-300">Username</Label>
-                    <Input id="username" value={profileData.username} className="bg-gray-800 border-gray-700 text-white focus:bg-gray-700 focus:border-violet-500" />
+                    <Input id="username" value={user?.username || ""} className="bg-gray-800 border-gray-700 text-white focus:bg-gray-700 focus:border-violet-500" />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-gray-300">Email</Label>
-                  <Input id="email" type="email" value={profileData.email} disabled className="bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed text-gray-400" />
+                  <Input id="email" type="email" value={user?.email || ""} disabled className="bg-gray-800 border-gray-700 opacity-50 cursor-not-allowed text-gray-400" />
                 </div>
-                 <div className="space-y-2">
-                    <Label htmlFor="organization" className="text-gray-300">Organization</Label>
-                    <Input id="organization" value={profileData.organization} className="bg-gray-800 border-gray-700 text-white focus:bg-gray-700 focus:border-violet-500" />
-                  </div>
               </CardContent>
               <div className="border-t border-gray-800 px-6 py-4 flex justify-end">
                   <Button className="bg-violet-600 hover:bg-violet-500 text-white transition-colors cursor-pointer">
