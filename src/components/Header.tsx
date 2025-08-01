@@ -5,16 +5,29 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { toast } from "sonner";
 import logo from "../assets/app-logo/mainlogo.svg";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+      toast.success("Logged out successfully!");
+      navigate("/");
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast.error("Logout failed, but you've been signed out locally");
+      // Even if API call fails, user is logged out locally
+      navigate("/");
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   // Don't show header on dashboard pages
@@ -51,12 +64,12 @@ const Header = () => {
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-white hover:text-violet-400 hover:bg-violet-500/10 cursor-pointer
-                  "
+                  className="text-white hover:text-violet-400 hover:bg-violet-500/10 cursor-pointer"
                   onClick={handleLogout}
+                  disabled={isLoggingOut}
                 >
                   <LogOut className="w-4 h-4 mr-2" />
-                  Logout
+                  {isLoggingOut ? "Logging out..." : "Logout"}
                 </Button>
               </>
             ) : (
@@ -106,21 +119,22 @@ const Header = () => {
                   </Button>
                   <Button
                     variant="ghost"
-                    className="text-white hover:text-violet-400 hover:bg-violet-500/10 justify-start"
-                    onClick={() => {
-                      handleLogout();
+                    className="text-white hover:text-violet-400 hover:bg-violet-500/10 justify-start cursor-pointer"
+                    onClick={async () => {
                       setIsMenuOpen(false);
+                      await handleLogout();
                     }}
+                    disabled={isLoggingOut}
                   >
                     <LogOut className="w-4 h-4 mr-2" />
-                    Logout
+                    {isLoggingOut ? "Logging out..." : "Logout"}
                   </Button>
                 </>
               ) : (
                 <>
                   <Button
                     variant="ghost"
-                    className="text-white hover:text-violet-400 hover:bg-violet-500/10 justify-start"
+                    className="text-white hover:text-violet-400 hover:bg-violet-500/10 justify-start cursor-pointer"
                     onClick={() => {
                       navigate("/signin");
                       setIsMenuOpen(false);
@@ -129,7 +143,7 @@ const Header = () => {
                     Sign In
                   </Button>
                   <Button
-                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0 justify-start"
+                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white border-0 justify-start cursor-pointer"
                     onClick={() => {
                       navigate("/signup");
                       setIsMenuOpen(false);
