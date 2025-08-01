@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { createContext, useContext, useState, useEffect } from "react";
+import { apiClient } from "../lib/apiClient";
 
 interface User {
   id: string;
@@ -16,6 +17,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   verifyOtp: (otp: string) => Promise<void>;
+  resendOtp: () => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -35,9 +37,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [signupData, setSignupData] = useState<{
+    name?: string;
+    email?: string;
+    password?: string;
+  }>({});
 
   useEffect(() => {
-    // Check if user is logged in (e.g., from localStorage)
     const savedUser = localStorage.getItem("user");
     if (savedUser) {
       setUser(JSON.parse(savedUser));
@@ -48,7 +54,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (email === "anas@marqait.com" && password === "anas") {
@@ -69,15 +74,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const signup = async (_name: string, _email: string, _password: string) => {
+  const signup = async (name: string, email: string, password: string) => {
     setIsLoading(true);
+    setSignupData({ name, email, password });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Don't log the user in directly after signup
-      // The user will be redirected to the OTP page
-
+      await apiClient.post("/api/v0/register/initiate", {
+        email,
+        password,
+        name,
+      });
     } catch (error) {
       throw new Error("Signup failed");
     } finally {
@@ -109,6 +114,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const resendOtp = async () => {
+    if (!signupData.email) {
+      throw new Error("No email found for resending OTP.");
+    }
+    try {
+      await apiClient.post("/api/v0/register/initiate", {
+        email: signupData.email,
+        password: signupData.password,
+        name: signupData.name,
+      });
+    } catch (error) {
+      throw new Error("Failed to resend OTP.");
+    }
+  };
 
   const logout = () => {
     setUser(null);
@@ -120,6 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     login,
     signup,
     verifyOtp,
+    resendOtp,
     logout,
     isLoading,
   };
