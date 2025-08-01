@@ -19,7 +19,6 @@ interface AuthContextType {
   signup: (name: string, email: string, password: string) => Promise<void>;
   verifyOtp: (otp: string) => Promise<void>;
   resendOtp: () => Promise<void>;
-  getOtpStatus: () => Promise<any>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -131,20 +130,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
     } catch (error) {
       throw new Error("Failed to resend OTP.");
-    }
-  };
-
-  const getOtpStatus = async () => {
-    if (!signupData.email) {
-      throw new Error("No email found to get OTP status.");
-    }
-    try {
-      const response = await apiClient.get(
-        `/api/v0/register/otp-status/${signupData.email}`
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error("Failed to get OTP status.");
     }
   };
 
