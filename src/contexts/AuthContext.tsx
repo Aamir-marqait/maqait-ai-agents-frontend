@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import type React from "react";
@@ -38,7 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [signupData, setSignupData] = useState<{
-    name?: string;
+    full_name?: string;
     email?: string;
     password?: string;
   }>({});
@@ -74,14 +75,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const signup = async (name: string, email: string, password: string) => {
+  const signup = async (full_name: string, email: string, password: string) => {
     setIsLoading(true);
-    setSignupData({ name, email, password });
+    setSignupData({ full_name, email, password });
     try {
       await apiClient.post("/api/v0/register/initiate", {
         email,
         password,
-        name,
+        full_name,
       });
     } catch (error) {
       throw new Error("Signup failed");
@@ -122,7 +123,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await apiClient.post("/api/v0/register/initiate", {
         email: signupData.email,
         password: signupData.password,
-        name: signupData.name,
+        full_name: signupData.full_name,
       });
     } catch (error) {
       throw new Error("Failed to resend OTP.");
