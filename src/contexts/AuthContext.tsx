@@ -59,7 +59,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   updateProfile: (data: UserUpdateData) => Promise<void>;
   deleteAccount: () => Promise<void>;
-  refreshUserProfile: () => Promise<void>;
+  refreshUserProfile: (silent?: boolean) => Promise<void>;
   getUserStats: () => Promise<void>;
   isLoading: boolean;
 }
@@ -203,11 +203,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const refreshUserProfile = async () => {
+  const refreshUserProfile = async (silent = false) => {
     if (!user) return;
 
     try {
-      setIsLoading(true);
+      if (!silent) {
+        setIsLoading(true);
+      }
       const response = await apiClient.get("/api/v0/users/profile");
 
       if (response.data) {
@@ -217,9 +219,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     } catch (error) {
       console.error("Error refreshing user profile:", error);
-      throw new Error("Failed to refresh profile");
+      if (!silent) {
+        throw new Error("Failed to refresh profile");
+      }
     } finally {
-      setIsLoading(false);
+      if (!silent) {
+        setIsLoading(false);
+      }
     }
   };
 
