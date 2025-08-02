@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactElement } from "react";
 import { CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,7 +29,7 @@ interface UIAgent {
   description: string;
   thumbnail: string;
   tags: string[];
-  icon: JSX.Element;
+  icon: ReactElement;
   credits: number;
   gradient: string;
   route: string;

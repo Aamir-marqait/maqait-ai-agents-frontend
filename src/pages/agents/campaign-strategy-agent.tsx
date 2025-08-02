@@ -5,13 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   ArrowLeft,
   Copy,
@@ -33,20 +27,16 @@ import {
   Eye,
   Clock,
   Share2,
-  TrendingUp,
-  Lightbulb,
+  
   Rocket,
   MessageCircle,
-  DollarSign,
-  Star,
-  Trophy,
+  
   Megaphone,
   Activity,
   BarChart3,
-  MapPin,
+ 
   Briefcase,
-  Play,
-  Pause,
+  
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { apiClient } from "../../lib/apiClient";
