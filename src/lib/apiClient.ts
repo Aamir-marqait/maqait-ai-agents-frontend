@@ -11,7 +11,7 @@ class ApiClient {
   constructor() {
     this.instance = axios.create({
       baseURL: import.meta.env.VITE_API_BASE_URL,
-      timeout: 30000,
+      timeout: 120000, // Increased to 2 minutes for agent executions
       headers: {
         "Content-Type": "application/json",
       },
@@ -80,6 +80,19 @@ class ApiClient {
     config?: AxiosRequestConfig
   ): Promise<AxiosResponse<T>> {
     return this.instance.delete<T>(url, config);
+  }
+
+  // Special method for agent executions with extended timeout
+  async executeAgent<T = any>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig
+  ): Promise<AxiosResponse<T>> {
+    const extendedConfig = {
+      ...config,
+      timeout: 180000, // 3 minutes for agent executions specifically
+    };
+    return this.instance.post<T>(url, data, extendedConfig);
   }
 
   getAxiosInstance(): AxiosInstance {
