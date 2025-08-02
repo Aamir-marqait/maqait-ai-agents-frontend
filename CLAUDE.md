@@ -476,3 +476,114 @@ const agentTheme = {
 5. **User Feedback**: Use toast notifications for actions like copy/export
 
 This pattern ensures consistent, scalable, and user-friendly agent interfaces that will handle millions of users without complaints! 🎯
+
+## 🚨 Critical Bug Fix: Global Loading State Issue
+
+### Problem Identified
+When agent generation completed and tried to refresh user profile (`refreshUserProfile()`), it was triggering a global loading state that caused a full-screen loader to take over the entire UI, creating a jarring user experience with UI resets.
+
+### Root Cause Analysis
+1. **Agent generation completes** → Calls `await refreshUserProfile()` to update user credits
+2. **`refreshUserProfile()` sets `isLoading = true`** in AuthContext (line 210)
+3. **`ProtectedRoute` component** (wrapping all dashboard pages) checks `isLoading`
+4. **When `isLoading = true`** → Shows full-screen spinner that replaces entire UI
+5. **Result**: Jarring "big loader takes over everything" + input reset experience
+
+### Solution Implemented
+**Modified AuthContext to support silent profile refresh:**
+
+```typescript
+// Updated interface
+interface AuthContextType {
+  refreshUserProfile: (silent?: boolean) => Promise<void>;
+  // ... other methods
+}
+
+// Updated implementation
+const refreshUserProfile = async (silent = false) => {
+  if (!user) return;
+
+  try {
+    if (!silent) {
+      setIsLoading(true); // Only show global loader when not silent
+    }
+    const response = await apiClient.get("/api/v0/users/profile");
+
+    if (response.data) {
+      const transformedUser = transformUserData(response.data);
+      setUser(transformedUser);
+      localStorage.setItem("user", JSON.stringify(transformedUser));
+    }
+  } catch (error) {
+    console.error("Error refreshing user profile:", error);
+    if (!silent) {
+      throw new Error("Failed to refresh profile");
+    }
+  } finally {
+    if (!silent) {
+      setIsLoading(false);
+    }
+  }
+};
+```
+
+**Updated Agent Generation Handler:**
+
+```typescript
+const handleGenerate = async () => {
+  // ... generation logic
+
+  // When generation completes:
+  if (parsedOutput) {
+    setOutput(parsedOutput);
+    
+    // 🔧 FIXED: Use silent refresh to avoid global loader
+    refreshUserProfile(true).catch(console.error);
+  }
+  
+  // ... rest of handler
+};
+```
+
+### Key Changes Made
+
+1. **AuthContext Enhancement**:
+   - Added optional `silent` parameter to `refreshUserProfile()`
+   - When `silent = true`, skips setting global `isLoading` state
+   - Credits still update correctly in background
+
+2. **Agent Integration Fix**:
+   - Changed `await refreshUserProfile()` to `refreshUserProfile(true).catch(console.error)`
+   - Profile updates happen silently without triggering global loader
+   - Error handling doesn't disrupt user experience
+
+3. **Global Loading Behavior**:
+   - `ProtectedRoute` still shows loader for legitimate auth operations
+   - Background profile refreshes don't trigger full-screen loading
+   - Smooth, uninterrupted user experience maintained
+
+### Results Achieved
+
+✅ **No more global loader takeover** during agent generation
+✅ **Credits still update correctly** after generation completes  
+✅ **UI stays smooth and responsive** throughout the process
+✅ **User input preserved** with no jarring transitions
+✅ **Background profile refresh** happens transparently
+
+### Implementation for Other Agents
+
+**Always use silent refresh in agent generation handlers:**
+
+```typescript
+// ❌ DON'T: This triggers global loader
+await refreshUserProfile();
+
+// ✅ DO: This updates credits silently
+refreshUserProfile(true).catch(console.error);
+```
+
+**When to use regular vs silent refresh:**
+- **Regular**: User-initiated profile updates, settings changes
+- **Silent**: Background operations, credit updates, automatic refreshes
+
+This fix ensures all agent interfaces maintain smooth UX without the disruptive global loading behavior! 🎯
