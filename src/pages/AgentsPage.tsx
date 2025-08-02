@@ -1,143 +1,99 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
-import { Search, Bot, ArrowRight } from "lucide-react";
+import { Search, Bot, ArrowRight, Loader2 } from "lucide-react";
+import { apiClient } from "../lib/apiClient";
 
-const agents = [
-  {
-    id: 1,
-    gradient: "from-violet-500 to-purple-600",
-    name: "Blog Agent",
+// Agent interface matching your backend schema
+interface Agent {
+  id: string;
+  name: string;
+  description: string;
+  agent_type: string;
+  cost_per_run: string;
+  is_active: boolean;
+  n8n_workflow_id: string;
+  crew_config: any;
+  created_at: string;
+  updated_at: string;
+}
+
+// UI Agent interface for frontend display
+interface UIAgent {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  thumbnail: string;
+  tags: string[];
+  icon: JSX.Element;
+  credits: number;
+  gradient: string;
+  route: string;
+}
+
+// Agent name to UI mapping (based on your backend agent names)
+const agentNameToUI: Record<string, Omit<UIAgent, 'id' | 'name' | 'description' | 'credits' | 'route'>> = {
+  'Blog Agent': {
     category: "Content Generation",
-    description:
-      "Your in-house columnist with a PhD in brand tone, creating human-like blogs.",
     thumbnail: "/card-1.jpg",
     tags: ["blogging", "content", "writing"],
-    icon: (
-      <img
-        src="/agent-logo/1.png"
-        alt="Blog Agent"
-        className="w-14 h-14"
-      />
-    ),
-    credits: 20,
+    icon: <img src="/agent-logo/1.png" alt="Blog Agent" className="w-14 h-14" />,
+    gradient: "from-violet-500 to-purple-600",
   },
-  {
-    id: 2,
-    name: "Social Media Post Generator",
-    category: "Social Media",
-    description:
-      "Crafts intelligent, sharp, and platform-ready content for LinkedIn and Twitter.",
+  'Social Media Generator': {
+    category: "Social Media", 
     thumbnail: "/card-2.png",
     tags: ["social media", "linkedin", "twitter"],
-    icon: (
-      <img
-        src="/agent-logo/2.png"
-        alt="Blog Agent"
-        className="w-14 h-14"
-      />
-    ),
-    credits: 15,
+    icon: <img src="/agent-logo/2.png" alt="Social Media Generator" className="w-14 h-14" />,
     gradient: "from-pink-500 to-rose-600",
   },
-  {
-    id: 3,
-    name: "Campaign Strategy Agent",
+  'Campaign Generator': {
     category: "Marketing",
-    description:
-      "Builds data-driven marketing strategies for precise and effective campaigns.",
-    thumbnail: "/card-3.jpg",
+    thumbnail: "/card-3.jpg", 
     tags: ["marketing", "strategy", "campaigns"],
-    icon: (
-      <img
-        src="/agent-logo/3.png"
-        alt="Blog Agent"
-        className="w-14 h-14"
-      />
-    ),
-    credits: 25,
+    icon: <img src="/agent-logo/3.png" alt="Campaign Generator" className="w-14 h-14" />,
     gradient: "from-blue-500 to-cyan-600",
   },
-  {
-    id: 4,
-    name: "Competitor Analysis Agent",
+  'Competitor Agent': {
     category: "Business Intelligence",
-    description:
-      "Tracks competitors to spot market gaps and keep you two steps ahead.",
     thumbnail: "/card-4.jpg",
-    tags: ["business", "competitors", "analysis"],
-    icon: (
-      <img
-        src="/agent-logo/4.png"
-        alt="Blog Agent"
-        className="w-14 h-14"
-      />
-    ),
-    credits: 20,
+    tags: ["business", "competitors", "analysis"], 
+    icon: <img src="/agent-logo/4.png" alt="Competitor Agent" className="w-14 h-14" />,
     gradient: "from-emerald-500 to-teal-600",
   },
-  {
-    id: 5,
-    name: "Audience Research Agent",
+  'Audience Analysis': {
     category: "Marketing",
-    description:
-      "Segments your audience and builds personas to help you speak their language.",
     thumbnail: "/card-5.jpg",
     tags: ["marketing", "audience", "research"],
-    icon: (
-      <img
-        src="/agent-logo/5.png"
-        alt="Blog Agent"
-        className="w-14 h-14"
-      />
-    ),
-    credits: 15,
+    icon: <img src="/agent-logo/5.png" alt="Audience Analysis" className="w-14 h-14" />,
     gradient: "from-orange-500 to-red-600",
   },
-  {
-    id: 6,
-    name: "Copy Optimization Agent",
-    category: "Content Generation",
-    description:
-      "Sharpens your existing copy to be more persuasive and conversion-focused.",
+  'Copy Writer': {
+    category: "Content Generation", 
     thumbnail: "/card-6.jpg",
     tags: ["copywriting", "optimization", "conversion"],
-    icon: (
-      <img
-        src="/agent-logo/6.png"
-        alt="Blog Agent"
-        className="w-14 h-14"
-      />
-    ),
-    credits: 10,
+    icon: <img src="/agent-logo/6.png" alt="Copy Writer" className="w-14 h-14" />,
     gradient: "from-indigo-500 to-purple-600",
-  },
-  {
-    id: 7,
-    name: "SEO Analysis Agent",
-    category: "SEO",
-    description:
-      "Fixes technical SEO issues, optimizes content, and boosts your SERP rankings.",
-    thumbnail: "/card-7.jpg",
-    tags: ["seo", "technical", "ranking"],
-    icon: (
-      <img
-        src="/agent-logo/7.png"
-        alt="Blog Agent"
-        className="w-14 h-14"
-      />
-    ),
-    credits: 20,
-    gradient: "from-green-500 to-emerald-600",
-  },
-];
+  }
+};
+
+// Agent name to route mapping (based on your existing routes)
+const agentNameToRoute: Record<string, string> = {
+  'Blog Agent': '/agents/blog-agent',
+  'Social Media Generator': '/agents/social-media-post-generator', 
+  'Campaign Generator': '/agents/campaign-strategy-agent',
+  'Competitor Agent': '/agents/competitor-analysis-agent',
+  'Audience Analysis': '/agents/audience-research-agent',
+  'Copy Writer': '/agents/copy-optimization-agent'
+};
 
 const categories = [
   "All",
-  "Content Generation",
+  "Content Generation", 
   "Social Media",
   "Marketing",
   "Business Intelligence",
@@ -149,7 +105,59 @@ import "../flip-card.css";
 const AgentsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [agents, setAgents] = useState<UIAgent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Transform backend agent to UI agent
+  const transformAgentToUI = (backendAgent: Agent): UIAgent => {
+    const uiConfig = agentNameToUI[backendAgent.name] || {
+      category: "Other",
+      thumbnail: "/placeholder.svg",
+      tags: ["general"],
+      icon: <Bot className="w-14 h-14 text-white" />,
+      gradient: "from-gray-500 to-gray-600",
+    };
+
+    const route = agentNameToRoute[backendAgent.name] || `/agents/${backendAgent.id}`;
+
+    return {
+      id: backendAgent.id,
+      name: backendAgent.name,
+      description: backendAgent.description,
+      credits: Math.round(parseFloat(backendAgent.cost_per_run)),
+      route,
+      ...uiConfig,
+    };
+  };
+
+  // Fetch agents from API
+  const fetchAgents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await apiClient.get('/api/v0/agents/');
+      const backendAgents: Agent[] = response.data;
+      
+      // Transform backend agents to UI format
+      const uiAgents = backendAgents
+        .filter(agent => agent.is_active) // Only show active agents
+        .map(transformAgentToUI);
+      
+      setAgents(uiAgents);
+    } catch (err: any) {
+      console.error('Error fetching agents:', err);
+      setError(err.response?.data?.detail || 'Failed to load agents');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAgents();
+  }, []);
 
   const filteredAgents = agents.filter((agent) => {
     const matchesSearch =
@@ -159,6 +167,72 @@ const AgentsPage = () => {
       selectedCategory === "All" || agent.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const handleAgentClick = (agent: UIAgent) => {
+    // Pass agent information via navigation state for better UX
+    navigate(agent.route, {
+      state: {
+        agentId: agent.id,
+        agent: {
+          id: agent.id,
+          name: agent.name,
+          description: agent.description,
+          cost_per_run: agent.credits.toString()
+        }
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white">AI Agents</h1>
+            <p className="text-gray-400 mt-1">
+              Discover and use powerful AI agents for your projects
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <Loader2 className="w-8 h-8 text-violet-500 animate-spin mx-auto mb-4" />
+            <p className="text-gray-400">Loading agents...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white">AI Agents</h1>
+            <p className="text-gray-400 mt-1">
+              Discover and use powerful AI agents for your projects
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-center py-12">
+          <div className="text-center">
+            <Bot className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-red-400 mb-2">Error loading agents</h3>
+            <p className="text-gray-500 mb-4">{error}</p>
+            <Button 
+              onClick={fetchAgents}
+              className="bg-violet-600 hover:bg-violet-700"
+            >
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -187,12 +261,11 @@ const AgentsPage = () => {
           {categories.map((category) => (
             <Button
               key={category}
-              // variant={selectedCategory === category ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(category)}
               className={
                 selectedCategory === category
-                  ? "bg-violet-600 hover:bg-violet-700 text-white whitespace-nowrap "
+                  ? "bg-violet-600 hover:bg-violet-700 text-white whitespace-nowrap"
                   : "border-gray-700 text-gray-300 hover:bg-gray-800 whitespace-nowrap cursor-pointer"
               }
             >
@@ -208,18 +281,7 @@ const AgentsPage = () => {
           <div
             key={agent.id}
             className="flip-card h-80 rounded-lg cursor-pointer"
-            onClick={() => {
-              const agentRoutes: Record<number, string> = {
-                1: '/agents/blog-agent',
-                2: '/agents/social-media-post-generator',
-                3: '/agents/campaign-strategy-agent',
-                4: '/agents/competitor-analysis-agent', 
-                5: '/agents/audience-research-agent',
-                6: '/agents/copy-optimization-agent',
-                7: '/agents/seo-analysis-agent'
-              };
-              navigate(agentRoutes[agent.id] || `/agents/${agent.id}`);
-            }}
+            onClick={() => handleAgentClick(agent)}
           >
             <div className="flip-card-inner rounded-lg">
               <div className="flip-card-front relative overflow-hidden rounded-lg">
@@ -306,6 +368,10 @@ const AgentsPage = () => {
                         </Badge>
                       ))}
                     </div>
+
+                    <div className="flex items-center gap-2 text-white/80 text-sm">
+                      <span>₹{agent.credits} per run</span>
+                    </div>
                   </div>
 
                   <div className="relative z-10 flex items-center justify-end">
@@ -321,7 +387,7 @@ const AgentsPage = () => {
         ))}
       </div>
 
-      {filteredAgents.length === 0 && (
+      {filteredAgents.length === 0 && !loading && (
         <div className="text-center py-12">
           <Bot className="w-12 h-12 text-gray-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-400 mb-2">
